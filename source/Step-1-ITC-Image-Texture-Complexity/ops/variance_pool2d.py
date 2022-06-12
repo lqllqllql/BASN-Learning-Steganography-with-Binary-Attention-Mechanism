@@ -31,13 +31,18 @@ class VariancePool2d(nn.Module):
     self._p = _quadruple(padding)  # convert to l, r, t, b
     
     #计算随机变量的期望值
+    # .AvgPool2d二维平均池化
     self.pool = nn.AvgPool2d(kernel_size=self.kernel_size, stride=self.stride)
   
   # 填充吗？
   # x是二维随机变量，特征图的像素
+  # If padding is non-zero,then the input is implicitly(隐式) zero-padded on both sides
+  # ---for padding number of points.
+  # 输入图像大小(N,C,ih,iw)
   def _padding(self, x):
     if self.same:
-      # ih,iw是x的每个维度的索引
+      # ih,iw是x的高度和宽度
+      # 下面是不同情况下，更新ih,iw
       ih, iw = x.size()[2:]
       if ih % self._s[0] == 0:
         ph = max(self._k[0] - self._s[0], 0)
@@ -59,5 +64,6 @@ class VariancePool2d(nn.Module):
 
   def forward(self, x):
     x = F.pad(x, self._padding(x), mode='reflect')
+    # 方差池化公式
     x = self.pool(x * x) - self.pool(x)**2
     return x
