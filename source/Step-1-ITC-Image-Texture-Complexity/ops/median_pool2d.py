@@ -35,6 +35,7 @@ class MedianPool2d(nn.Module):
         pw = max(self.k[1] - self.stride[1], 0)
       else:
         pw = max(self.k[1] - (iw % self.stride[1]), 0)
+        
       pl = pw // 2
       pr = pw - pl
       pt = ph // 2
