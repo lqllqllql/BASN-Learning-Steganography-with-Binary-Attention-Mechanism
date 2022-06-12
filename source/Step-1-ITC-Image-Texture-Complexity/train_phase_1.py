@@ -3,6 +3,9 @@ Train Phase 1: Train Embedding Attention
 '''
 # pylint: disable=C0111, C0414, W0603, W0621, E1101
 
+# argparse 模块对编写用户友好的命令接口；
+# ---程序定义它所需的参数，使用argparse将弄清如何从sys.argv解析出这些参数；
+# ---argparse模块自动生成帮助和使用手册，并在用户给程序传入无效参数时报出错误信息。
 import argparse
 import datetime
 import json
@@ -11,10 +14,12 @@ import pathlib
 import random
 import time
 
+# ruamel.yaml is a YAML 1.2 loader/dumper package for Python.
 from ruamel.yaml import YAML
 import numpy as np
 
 import torch
+# 多GPU运行
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
@@ -32,7 +37,7 @@ import utils
 
 class Main(object):
   """Main Module"""
-
+  # 定义一个方法
   def __init__(self):
     self.args, self.config = Main.prepare_cmd_args()
     self.unique_id = self.gen_unique_id()
@@ -43,11 +48,10 @@ class Main(object):
     self.prepare_directories()
 
     self.logger = self.prepare_loggers()
-
     self.prepare_seed_and_cudnn()
 
     self.dataset_train, self.dataset_valid = self.prepare_datasets()
-
+    # 初始化模型参数
     # Initialized in run()
     self.epoch = 0
     self.gidx = 0
@@ -56,7 +60,7 @@ class Main(object):
     self.image_smoother = None
     self.variance_pool2d = None
     self.loss = None
-
+    # 优化器
     self.optm = None
 
     # Metrics
@@ -65,10 +69,13 @@ class Main(object):
   @staticmethod
   def prepare_cmd_args():
     # Arguments
+    # argparse.ArgumentParser()创建一个ArgumentParser对象
     parser = argparse.ArgumentParser()
+    # 通过调用.add_argument()方法给ArgumentParser对象添加程序参数信息
     parser.add_argument('--config', default='config-phase-1.yaml', help='configuration file path')
     parser.add_argument('--comment', default='', help='current training comment')
     parser.add_argument('--restart', action='store_true', default=False)
+    # 通过该命令调用对象
     args = parser.parse_args()
 
     config_path = args.config
@@ -76,10 +83,13 @@ class Main(object):
     # Setup configurations
     with open(config_path, 'r') as f:
       yaml = YAML()
+      # download package
       config = yaml.load(f)
 
     return args, config
-
+  
+  # 因为注意力机制显式地考虑随意线索query
+  # 通过注意力池化层来偏向性的选择某些输入（权重），根据query有偏向地选择value、key对
   def gen_unique_id(self):
     def _gen_fullname(name, run_id, comment=''):
       if comment:
@@ -104,6 +114,7 @@ class Main(object):
     self.checkpoint_path = pathlib.Path(self.config['checkpoint_path'])
     self.checkpoint_path.mkdir(parents=True, exist_ok=True)
 
+  # 日志文件
   def prepare_loggers(self):
     logging.basicConfig(
         format='[%(asctime)s][%(levelname)-5.5s] %(message)s',
@@ -115,24 +126,30 @@ class Main(object):
     logger.setLevel(logging.DEBUG)
 
     return logger
-
+  
+  # 随机种子
   def prepare_seed_and_cudnn(self):
     seed = self.config['seed']
     np.random.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)
 
+    # self.config 调用的是prepare_cmd_args()函数
     if self.config['deterministic']:
       cudnn.deterministic = True
 
+  # 数据集
   def prepare_datasets(self):
+    # 训练集
     dataset_train = dataset_tools.ILSVRC2012(
         self.config['dataset_train_path'],
         transforms.Compose([
+            # 随机剪裁和折叠
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
         ]))
+    # 验证集
     dataset_valid = dataset_tools.ILSVRC2012(
         self.config['dataset_valid_path'],
         transforms.Compose([
@@ -140,7 +157,9 @@ class Main(object):
             transforms.CenterCrop(224),
             transforms.ToTensor(),
         ]))
-
+    
+    # 下载数据集
+    # 通过翻转操作扩大了数据集
     dataset_train = torch.utils.data.DataLoader(
         dataset_train,
         batch_size=self.config['batch_size'],
