@@ -23,6 +23,7 @@ def conv3x3(in_planes, out_planes):
 
 # 反卷积层
 # .ConvTranspose2d
+# https://zhuanlan.zhihu.com/p/48501100
 def deconv3x3(in_planes, out_planes):
   """3x3 convolution transpose with padding"""
   return nn.ConvTranspose2d(in_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False)
@@ -126,7 +127,7 @@ class Encoder(nn.Module):
     self.actv_fn = nn.ELU
     # .Sequential模块将网络层连接起来
     self.model = nn.Sequential(
-        # 像素图的深度取决于卷积核的个数
+        # 像素图的深度取决于卷积核的个数，参考：https://blog.csdn.net/beautiful77moon/article/details/101724814
         # 3（RGB）个卷积核，64个卷积核
         self.conv_fn(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
         self.actv_fn(),
