@@ -78,12 +78,14 @@ class Main(object):
     # 通过该命令调用对象
     args = parser.parse_args()
 
+    # 读取配置文件
     config_path = args.config
 
     # Setup configurations
+    # r读取
     with open(config_path, 'r') as f:
       yaml = YAML()
-      # download package
+      # download package or files
       config = yaml.load(f)
 
     return args, config
@@ -103,7 +105,8 @@ class Main(object):
     fullname = _gen_fullname(name, run_id, comment)
 
     return fullname
-
+  
+  # 文件夹
   def prepare_directories(self):
     self.logging_path = pathlib.Path(self.config['logging_path'])
     self.logging_path.mkdir(parents=True, exist_ok=True)
