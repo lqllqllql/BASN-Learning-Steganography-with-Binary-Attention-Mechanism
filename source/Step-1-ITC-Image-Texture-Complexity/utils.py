@@ -4,6 +4,8 @@ Utilitiy Functions
 '''
 
 import PIL.Image
+#  collections模块：提供不同类型的container；container是一个对象，用于存储不同对象，并提供一种访问所包含对象并循环访问他们的方法。
+# https://www.geeksforgeeks.org/python-collections-module/
 import collections
 import math
 import numpy as np
@@ -82,10 +84,14 @@ def accuracy(predictions, labels, top_k=(1, )):
     return [_get_accuracy_from_correct(k) for k in top_k]
 
 
+# DataParallel分布式训练
+# state_dict：字典
 def remove_data_parallel_prefix(state_dict):
   """Remove DataParallel Prefix for Model Restoring"""
-  new_state_dict = collections.OrderedDict()
+  new_state_dict = collections.OrderedDict()#定义一个字典子类，会记录键的插入顺序。
+  # k:索引或顺序，v:值
   for k, v in state_dict.items():
+    # .startswith()：检查字符串是否以module.开头
     if k.startswith('module.'):
       k = k[7:]
     new_state_dict[k] = v
