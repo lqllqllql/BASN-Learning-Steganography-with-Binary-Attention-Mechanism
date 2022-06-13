@@ -12,14 +12,14 @@ import numpy as np
 
 import torch
 
-
+# 学习率
 def adjust_learning_rate(learning_rate, optimizer, epoch):
   """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
   lr = learning_rate * (0.1**(epoch // 30))
   for param_group in optimizer.param_groups:
     param_group['lr'] = lr
 
-
+# 准确率
 def accuracy(predictions, labels, top_k=(1, )):
   """Computes the top-k(s) for the specified values of k"""
   with torch.no_grad():
