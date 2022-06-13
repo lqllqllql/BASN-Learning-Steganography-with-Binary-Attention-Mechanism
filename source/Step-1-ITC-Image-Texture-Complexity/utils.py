@@ -39,7 +39,7 @@ class Edges(object):
     # np.zeros_like()：返回与给定图像具有相同形状和类型的零数组
     # ---初始化为最低阈值矩阵
     canny_edges = np.zeros_like(canny_edges_mask) + soft_min
-    # ？？
+    # 通过索引将指定位置的值替换成soft_max
     canny_edges[canny_edges_mask] = soft_max
     
     # 对象：归一化后的图像像素矩阵，以便增加数据集数量
