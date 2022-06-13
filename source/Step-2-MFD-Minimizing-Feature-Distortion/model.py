@@ -21,12 +21,13 @@ def conv3x3(in_planes, out_planes):
   """3x3 convolution with padding"""
   return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False)
 
-
+# 反卷积层
+# .ConvTranspose2d
 def deconv3x3(in_planes, out_planes):
   """3x3 convolution transpose with padding"""
   return nn.ConvTranspose2d(in_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False)
 
-
+# 初始化模型：不同网络层使用不同的初始化方法
 def initialize_module(model, no_init_types=None):
   """Initialize a pytorch Module"""
   for m in model.modules():
@@ -49,15 +50,15 @@ def initialize_module(model, no_init_types=None):
     else:
       raise RuntimeError('Uninitialized layer: %s\n%s' % (type(m), m))
 
-
+# encoder基本块：因为涉及残差网络
 class EncoderBasicBlock(nn.Module):
   def __init__(self, in_planes, out_planes):
     super(EncoderBasicBlock, self).__init__()
-
+    
     self.conv_fn = conv3x3
     self.norm_fn = lambda: nn.BatchNorm2d(out_planes)
     self.actv_fn = nn.ELU
-
+    # 网络搭建
     self.conv1 = self.conv_fn(in_planes, out_planes)
     self.norm1 = self.norm_fn()
     self.actv1 = self.actv_fn()
@@ -75,14 +76,14 @@ class EncoderBasicBlock(nn.Module):
 
     x = self.conv2(x)
     x = self.norm2(x)
-
+    # 使用到残差网络
     x += residual
 
     x = self.actv2(x)
 
     return x
 
-
+# decoder基本块
 class DecoderBasicBlock(nn.Module):
   def __init__(self, in_planes, out_planes):
     super(DecoderBasicBlock, self).__init__()
@@ -123,8 +124,10 @@ class Encoder(nn.Module):
     self.conv_fn = nn.Conv2d
     self.norm_fn = nn.BatchNorm2d
     self.actv_fn = nn.ELU
-
+    # .Sequential模块将网络层连接起来
     self.model = nn.Sequential(
+        # 像素图的深度取决于卷积核的个数
+        # 3（RGB）个卷积核，64个卷积核
         self.conv_fn(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
         self.actv_fn(),
         block(64, 64),
