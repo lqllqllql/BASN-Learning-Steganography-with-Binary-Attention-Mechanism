@@ -5,7 +5,9 @@ BaseMain Module
 import argparse
 import random
 import datetime
+# https://zhuanlan.zhihu.com/p/33524938
 import pathlib
+# 管理日志文件模块
 import logging
 
 import numpy as np
@@ -18,7 +20,7 @@ from ruamel.yaml import YAML
 
 class BaseMain(object):
   '''Base Main Module'''
-
+  # 初始化参数
   def __init__(self, default_config):
     self.args, self.config = BaseMain.prepare_cmd_args(default_config)
     self.uuid = self.generate_uuid()
@@ -34,6 +36,7 @@ class BaseMain(object):
   @staticmethod
   def prepare_cmd_args(default_config):
     '''Prepare cmdline Arguments'''
+    # 定义命令行参数
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default=default_config, help='configuration file path')
     parser.add_argument('--comment', default='', help='current training comment')
@@ -51,15 +54,17 @@ class BaseMain(object):
 
   def generate_uuid(self):
     '''Generate Run UUID'''
-
+    # 生成运行UUID[识别信息通用唯一标识符，一共128个]
     def _gen_fullname(name, run_id, comment=''):
+      # comment：标签
       if comment:
         return f'{name}-{run_id}-{comment}'
       return f'{name}-{run_id}'
 
     name = 'phase-%d-%s' % (self.config['task_phase'], self.config['task_name'])
     # integer timestamp last 10 digits as run_id
-    run_id = ('%010d' % int(datetime.datetime.now().timestamp()))[-10:]
+    # 整数时间戳最后10位作为run_id
+    run_id = ('%010d' % int(datetime.datetime.now().timestamp())) [-10:]
     comment = self.args.comment
     fullname = _gen_fullname(name, run_id, comment)
 
@@ -67,6 +72,7 @@ class BaseMain(object):
 
   def prepare_directories(self):
     '''Make directories'''
+    # 制作日志目录
     self.logging_path = pathlib.Path(self.config['logging_path'].format(uuid=self.uuid))
     self.logging_path.mkdir(parents=True, exist_ok=True)
 
@@ -84,6 +90,7 @@ class BaseMain(object):
 
   def prepare_loggers(self):
     '''Create Loggers'''
+    # 制作日志
     logging.basicConfig(
         format='[%(asctime)s][%(levelname)-5.5s] %(message)s',
         handlers=[
