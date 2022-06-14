@@ -154,7 +154,7 @@ class Encoder(nn.Module):
     x = self.model(x)
     return x
 
-
+# decoder是使用反卷积
 class Decoder(nn.Module):
   def __init__(self, block):
     super(Decoder, self).__init__()
@@ -193,13 +193,14 @@ class Decoder(nn.Module):
 
     if epoch and epoch > 3:
       x = self.actv_fn(x)
+      # 激活函数
       x = F.hardtanh(x, min_val=0.0, max_val=1.0)
     else:
       x = torch.sigmoid(x)
 
     return x
 
-
+# MFD注意力机制
 class Attentioner(nn.Module):
   def __init__(self, encoder_block, decoder_block):
     super(Attentioner, self).__init__()
@@ -215,6 +216,7 @@ class Attentioner(nn.Module):
     self.model = nn.Sequential(
         self.conv_fn(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
         self.actv_fn(),
+        # 编码卷积块
         self.encoder_block(64, 64),
         #
         self.conv_fn(64, 128, kernel_size=3, stride=2, padding=1, bias=False),
@@ -226,7 +228,7 @@ class Attentioner(nn.Module):
         self.norm_fn(256),
         self.actv_fn(),
         self.encoder_block(256, 256),
-        #
+        # 解码反卷积块
         self.dcnv_fn(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False),
         self.norm_fn(128),
         self.actv_fn(),
