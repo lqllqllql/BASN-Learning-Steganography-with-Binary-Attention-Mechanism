@@ -3,6 +3,7 @@ Train Phase 1: Train Autoencoder
 """
 # pylint: disable=C0111, C0414, W0603, W0621, E1101
 
+# 数据类型转换模块
 import json
 import time
 
@@ -13,10 +14,13 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torchvision
+# 将图像转换成tensor类型以及各类图像转换
 import torchvision.transforms as transforms
 
+# 可视化工具
 from torchsummary import summary
 
+# 自己定义的模块
 import base_main
 import dataset_tools
 import model
