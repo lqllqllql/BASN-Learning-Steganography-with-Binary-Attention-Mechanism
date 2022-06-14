@@ -29,14 +29,13 @@ import utils
 
 class DataObject(object):
   """Misc Data used in Training and Validation"""
-
+  # 训练和验证中使用的其他数据
   class Metrics(object):
     """All Metrics used in Training and Validation"""
-
+    # 指标体系
     def __init__(self):
       self.dslt = utils.AverageMetrics()  # DataSet Loading Time
       self.btpt = utils.AverageMetrics()  # BaTch Processing Time
-
       self.loss = utils.AverageMetrics()
 
     def reset_all(self):
@@ -46,10 +45,11 @@ class DataObject(object):
 
   class Loss(object):
     """All Losses used in Training and Validation"""
-
+    # 训练集喝验证集的全部损失
     def __init__(self):
       self.loss = None
-
+  
+  # 初始化参数
   def __init__(self):
     self.mt = DataObject.Metrics()
     self.ls = DataObject.Loss()
@@ -61,7 +61,6 @@ class DataObject(object):
 
 class Main(base_main.BaseMain):
   """Main Module"""
-
   def __init__(self, default_config='config-phase-1.yaml'):
     super(Main, self).__init__(default_config)
 
@@ -88,6 +87,7 @@ class Main(base_main.BaseMain):
   def prepare_datasets(self):
     dataset_train = dataset_tools.ILSVRC2012(
         self.config['dataset_train_path'],
+        # 图像类型转换
         transforms.Compose([
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
@@ -142,7 +142,8 @@ class Main(base_main.BaseMain):
     self.optm.load_state_dict(checkpoint)
 
     self.logger.info('[epoch=%d] All checkpoints loaded.', self.epoch)
-
+  
+  # 保存
   def save_checkpoint(self, best_metric_name=None, metric_values=None):
     pathbase = self.checkpoint_path
     if best_metric_name:
